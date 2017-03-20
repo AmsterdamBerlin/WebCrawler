@@ -1,0 +1,6 @@
+
+# not running on python
+# opened in browser
+https://maps.googleapis.com/maps/api/geocode/json?address=1+Science+Park+Boston+MA+02114&key=AIzaSyBZ_FXRsjdsNVB_ejbwO52G_gQCea_V3nw
+
+https://maps.googleapis.com/maps/api/timezone/json?location=42.3677994,-71.0708078&timestamp=1412649030&key=AIzaSyBZ_FXRsjdsNVB_ejbwO52G_gQCea_V3nw
