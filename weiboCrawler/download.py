@@ -1,4 +1,3 @@
-from urllib.request import urlretrieve
 from bs4 import BeautifulSoup
 import requests
 import os
@@ -18,7 +17,7 @@ class downloading:
         filepath = os.path.join(path, Urls)
         if not os.path.exists(path):
             os.makedirs(path)
-
+        # ---- collect urls of images that are going to be downloaded
         writeUrl = open(filepath, 'w')
         for link in self.downloadList:
             # change small size to large size
@@ -32,9 +31,10 @@ class downloading:
 
     def __retrieve(self):
         for i, url in  enumerate(self.image_urls):
-            urlretrieve(url, os.path.join(path, str(i)+".jpg")) #403 block
-            time.sleep(1) # to prevent from 403 block
-
+            response = requests.get(url)
+            image = response.content
+            with open(os.path.join(path, str(i)+".jpg"),"wb") as image_object:
+                image_object.write(image)
         print("images are stored")
 
     def getImages(self):
