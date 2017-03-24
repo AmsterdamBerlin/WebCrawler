@@ -1,11 +1,12 @@
 from getPage import *
 from download import *
 
-username =   #"makeAmericaGreatAgain@qq.com"
-password =   #"********"
+username =    #"makeAmericaGreatAgain@qq.com"
+password =           #"********"
 
-targetUser = # "Trump"
+targetUser = 
 targetUrl =
+
 
 onlyTxt = False
 
