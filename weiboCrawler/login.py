@@ -2,16 +2,15 @@ from bs4 import BeautifulSoup
 import requests
 import binascii
 import base64
+import json
 import rsa
 import re
 
 loginURL = "https://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.15)"
 preUrl = "https://login.sina.com.cn/sso/prelogin.php?entry=sso&callback=sinaSSOController.preloginCallBack&su=YXNk&rsakt=mod&client=ssologin.js(v1.4.15)"
-username = #"makeAmericaGreatAgain@qq.com"
-password = #"********"
 
 
-def pre_login():
+def prelogin():
     req = requests.get(preUrl)
     jsonStr = re.findall('\((\{.*?\})\)', req.text)[0]
     data = json.loads(jsonStr)
@@ -23,7 +22,7 @@ def pre_login():
 
     return servertime, nonce, pubkey, rsakv
 
-def getSu(username):
+def getSu( username):
     # encrypt username into su
     su = base64.b64encode(username.encode('utf-8')).decode('utf-8')
     return su
@@ -72,12 +71,27 @@ def login(su, sp, servertime, nonce, rsakv):
     session = requests.Session()
     session.headers = headers
     res = session.post(loginURL, data=postData)
-    #   _______________________________#
+    print(res.content)
     info = res.json()
-    print(info["retcode"])
+    if info["retcode"] == '0':
+        print("login sucess")
+    else:
+        print("login failes")
+    return session
 
 
-servertime, nonce, pubkey, rsakv = pre_login()
-su = getSu(username)
-sp = getSp(password,servertime, nonce, pubkey)
-login(su, sp, servertime, nonce, rsakv)
+
+if __name__ == "__main__":
+    servertime, nonce, pubkey, rsakv = prelogin()
+    su = getSu(username)
+    sp = getSp(password,servertime, nonce, pubkey)
+    session = login(su, sp, servertime, nonce, rsakv)
+
+    res = session.get(targetUrl)
+    html = res.content
+    print(html)
+    bsObj = BeautifulSoup(html,"lxml")
+
+    #downloadList = bsObj.findAll("img",{"src":re.compile("http://ww")})
+    #if len(downloadList) > 1:
+    #    print("ncie")
