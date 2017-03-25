@@ -2,14 +2,14 @@ from bs4 import BeautifulSoup
 import requests
 import binascii
 import base64
-import json
 import rsa
 import re
 
 loginURL = "https://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.15)"
 preUrl = "https://login.sina.com.cn/sso/prelogin.php?entry=sso&callback=sinaSSOController.preloginCallBack&su=YXNk&rsakt=mod&client=ssologin.js(v1.4.15)"
-username =   #"makeAmericaGreatAgain@qq.com"
-password = 
+username = #"makeAmericaGreatAgain@qq.com"
+password = #"********"
+
 
 def pre_login():
     req = requests.get(preUrl)
@@ -72,8 +72,9 @@ def login(su, sp, servertime, nonce, rsakv):
     session = requests.Session()
     session.headers = headers
     res = session.post(loginURL, data=postData)
-    info = json.loads(res.text)
-    print(info)
+    #   _______________________________#
+    info = res.json()
+    print(info["retcode"])
 
 
 servertime, nonce, pubkey, rsakv = pre_login()

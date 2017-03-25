@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
 import base64
-import json
 
 baseUrl = "http://login.sina.com.cn/signup/signin.php?entry=sso"
 searchUrl = "http://s.weibo.com"
@@ -33,8 +32,7 @@ def login(username, password):
     loginURL = r'https://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.15)'
     session = requests.Session()
     res = session.post(loginURL, data = postData)
-    jsonStr = res.content.decode('gbk')
-    info = json.loads(jsonStr)
+    info = res.json()
     if info["retcode"] == "0":
         print("登录成功")
         print(info)
