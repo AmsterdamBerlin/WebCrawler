@@ -14,7 +14,7 @@ class crawling():
         self.username = username
         self.password = password
         self.targetUser = targetUser
-        self.driver = webdriver.PhantomJS(executable_path='../Practices/8.avoidTrap/phantomjs')
+        self.driver = webdriver.PhantomJS(executable_path='../../Practices/8.avoidTrap/phantomjs')
         self.driver.maximize_window()   # set a fake browser size before doing get
 
         #  ----  login  -----

@@ -1,12 +1,11 @@
-from getPage import *
+from slow_login import *
 from download import *
 
-username =    #"makeAmericaGreatAgain@qq.com"
-password =           #"********"
+username =
+password =
 
-targetUser = 
+targetUser =
 targetUrl =
-
 
 onlyTxt = False
 

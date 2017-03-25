@@ -1,5 +1,5 @@
-run: weibo.py
-	python3 weibo.py
+run: weiboMain.py
+	python3 weiboMain.py
 
 clean:
 	rm -rf imagesUrl/
