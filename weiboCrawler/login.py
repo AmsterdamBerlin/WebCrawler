@@ -64,32 +64,42 @@ def login(su, sp, servertime, nonce, rsakv):
         "prelt": "408",
         "returntype": "TEXT",
     }
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.71 Safari/537.36",
-        "Accept-Encoding": "gzip, deflate",
+    headers = { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'
     }
-    session = requests.Session()
-    session.headers = headers
-    res = session.post(loginURL, data=postData)
-    print(res.content)
-    info = res.json()
-    if info["retcode"] == '0':
-        print("login sucess")
+    session = requests.session()
+    #session.headers = headers
+    session.headers.update(headers)
+    res_post = session.post(loginURL, data=postData)
+    info = res_post.json()
+    #print(info)
+    link_1 = info["crossDomainUrlList"][0]
+    link_2 = info["crossDomainUrlList"][1]
+    nickname = info["nick"]
+    uid = info["uid"]
+    print("link 1 is : ", link_1, "\n", "lind 2 is : ",link_2,"\n",nickname,'\n',uid)
+    # weibo login is so annoying that it requires two more redirecting to get needed cookies/info
+    redirect_1 = session.get(link_1)
+    redirect_2 = session.get(link_2)
+
+    if redirect_2.json()['retcode'] == 20000000:
+        print("login success")
+        res_get = session.get(targetUrl)
+        print(res_get.headers)
     else:
         print("login failes")
+
     return session
-
-
 
 if __name__ == "__main__":
     servertime, nonce, pubkey, rsakv = prelogin()
     su = getSu(username)
     sp = getSp(password,servertime, nonce, pubkey)
     session = login(su, sp, servertime, nonce, rsakv)
-
     res = session.get(targetUrl)
+    #print(res.headers)
+    #print(res.cookies)
     html = res.content
-    print(html)
+    #print(html)
     bsObj = BeautifulSoup(html,"lxml")
 
     #downloadList = bsObj.findAll("img",{"src":re.compile("http://ww")})
