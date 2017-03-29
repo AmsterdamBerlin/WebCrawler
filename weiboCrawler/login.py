@@ -175,19 +175,22 @@ class client:
         print("links are stored")
         return work
 
+    def collect_album(self,album):
+        pic_num = 50
+        page_num = int(album.size/pic_num) + 1
+        for page_iter in range(page_num):
+            photo_url = self.find_photos(album,pic_num,page_iter+1)
+            self.write_url(photo_url, album, page_iter)
+            print(page_iter, '\n', album.name)
+
+
     def download(self, target_uid):
         self.target_uid = target_uid
         self.album_info = self.find_albums()
-        album = self.album_info[1]
 
-        pic_num = 30
-        page_num = int(album.size/100) + 1
+        for album in self.album_info:
+            if album.size > 0:
+                self.collect_album(album)
 
-        for page_iter in range(page_num):
-            print(album.name)
-            photo_url = self.find_photos(album,pic_num,page_iter)
-            print(page_iter)
-        #photo_url = self.find_photos(album)
-            self.write_url(photo_url, album, page_iter)
 
         # write down urls
