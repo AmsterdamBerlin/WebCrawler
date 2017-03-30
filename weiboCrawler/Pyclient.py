@@ -119,7 +119,7 @@ class client:
 
         return self.session
 
-    def find_albums(self):
+    def __find_albums(self):
         album_url = "http://photo.weibo.com/albums/get_all"
         info_album = namedtuple("info_album", "name, id, size, type")
         params_album = {
@@ -131,17 +131,17 @@ class client:
         info = self.session.get(album_url, params = params_album).json()['data']
         album_list = info['album_list']
         # sort the album out of the info; a struct is needed to store those data
-        album_info = [info_album(name=album['caption'],\
-                                 id=album['album_id'],\
-                                 size=album['count']['photos'],\
-                                 type=album['type'])\
+        album_info = [info_album(name=album['caption'],
+                                 id=album['album_id'],
+                                 size=album['count']['photos'],
+                                 type=album['type'])
                       for album in album_list]
         for album in album_info:
             print(album)
         return album_info
 
-    def find_photos(self,album, count, page):
-
+    def __find_photos(self,album, count, page):
+        info_photo = namedtuple('info_photo', "photo_url, photo_id")
         photo_url = "http://photo.weibo.com/photos/get_all"
         params_photo = {
             'uid': self.target_uid,
@@ -157,40 +157,53 @@ class client:
         photo_url =[]
         for photo in photo_list:
             photo_url.append(photo['pic_host'] + '/large/' + photo['pic_name'] + '\n')
-        #    download this photo
+
         print('-------')
-        #print(photo_url[0])
         return photo_url
 
-    def write_url(self,photo_url, album, index):
-        path = "./imagesUrl/" + album.name
-        url_file = str(index) + "url.txt"
-        filepath = os.path.join(path, url_file)
+    def __write_url(self,photo_url, album, index):
+        path = "./url/" + album.name
+        txt = str(index) + "_url.txt"
+        txt_path = os.path.join(path, txt)
         if not os.path.exists(path):
             os.makedirs(path)
         # ---- collect urls of images that are going to be downloaded
-        work = open(filepath, 'w')
-        for url in photo_url:
-            work.write(url)
+        with open(txt_path,'w') as f:
+            f.write(''.join(photo_url))
         print("links are stored")
-        return work
 
-    def collect_album(self,album):
+    def __write_pic(self,photo_url, album, index):
+        path = "./pic/" + album.name
+        jpg_path = os.path.join(path)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        # ---- collect urls of images that are going to be downloaded
+        for i, url in  enumerate(photo_url):
+            response = self.session.get(url)
+            pic = response.content
+            with open(os.path.join(path, str(index)+'_'+str(i)+".jpg"),"wb") as f:
+                f.write(pic)
+        print("images are stored")
+
+    def __collect_album(self,album):
         pic_num = 50
         page_num = int(album.size/pic_num) + 1
         for page_iter in range(page_num):
-            photo_url = self.find_photos(album,pic_num,page_iter+1)
-            self.write_url(photo_url, album, page_iter)
+            photo_url = self.__find_photos(album,pic_num,page_iter+1)
+            self.__write_url(photo_url, album, page_iter+1)
+            self.__write_pic(photo_url, album, page_iter+1)
             print(page_iter, '\n', album.name)
 
 
     def download(self, target_uid):
         self.target_uid = target_uid
-        self.album_info = self.find_albums()
+        self.album_info = self.__find_albums()
 
         for album in self.album_info:
             if album.size > 0:
-                self.collect_album(album)
+                self.__collect_album(album)
+
+        self.session.close()
 
 
         # write down urls
