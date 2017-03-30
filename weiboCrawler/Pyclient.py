@@ -1,8 +1,10 @@
-from bs4 import BeautifulSoup
 from collections import namedtuple
+from bs4 import BeautifulSoup
+from log import *
 import requests
 import binascii
 import base64
+import time
 import json
 import rsa
 import re
@@ -113,9 +115,9 @@ class client:
         rd_success = self.__redirect(res)
 
         if rd_success == True:
-            print("login success: \n", "nickname is: ", self.nickname, "user ID is: ", self.uid)
+            logger.info("login success! nickname is: " + self.nickname + "; user ID is: " + self.uid)
         else:
-            print("login failes")
+            logger.error("login failes")
 
         return self.session
 
@@ -131,13 +133,15 @@ class client:
         info = self.session.get(album_url, params = params_album).json()['data']
         album_list = info['album_list']
         # sort the album out of the info; a struct is needed to store those data
-        album_info = [info_album(name=album['caption'],
-                                 id=album['album_id'],
-                                 size=album['count']['photos'],
-                                 type=album['type'])
-                      for album in album_list]
-        for album in album_info:
-            print(album)
+        album_info = []
+        for album in album_list:
+            album_info.append(info_album(name = album['caption'],
+                                         id=album['album_id'],
+                                         size=album['count']['photos'],
+                                         type=album['type']))
+
+            logger.info(album['caption'] + " album is found")
+
         return album_info
 
     def __find_photos(self,album, count, page):
@@ -151,14 +155,13 @@ class client:
             'type': album.type,
         }
         info_album = self.session.get(photo_url,params = params_photo).json()['data']
-        print(params_photo)
+        logger.info(params_photo)
         photo_list = info_album['photo_list']
         #work = self.write_url(photo_url, album)
         photo_url =[]
         for photo in photo_list:
             photo_url.append(photo['pic_host'] + '/large/' + photo['pic_name'] + '\n')
 
-        print('-------')
         return photo_url
 
     def __write_url(self,photo_url, album, index):
@@ -170,7 +173,7 @@ class client:
         # ---- collect urls of images that are going to be downloaded
         with open(txt_path,'w') as f:
             f.write(''.join(photo_url))
-        print("links are stored")
+        logger.info("urls are stored")
 
     def __write_pic(self,photo_url, album, index):
         path = "./pic/" + album.name
@@ -183,7 +186,7 @@ class client:
             pic = response.content
             with open(os.path.join(path, str(index)+'_'+str(i)+".jpg"),"wb") as f:
                 f.write(pic)
-        print("images are stored")
+        logger("pics are stored")
 
     def __collect_album(self,album):
         pic_num = 50
@@ -193,6 +196,8 @@ class client:
             self.__write_url(photo_url, album, page_iter+1)
             self.__write_pic(photo_url, album, page_iter+1)
             print(page_iter, '\n', album.name)
+            # a delay to prevent from blocking by server
+            time.sleep(1)
 
 
     def download(self, target_uid):
